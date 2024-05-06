@@ -1,28 +1,42 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-import inspect
-import textwrap
-
 import streamlit as st
+import webbrowser
+import imdb
+
+# Create an IMDb object
+ia = imdb.IMDb()
+
+# Function to search for a movie
+def search_movie(title):
+    movies = ia.search_movie(title)
+    return movies
+
+st.set_page_config(page_title="NIPSFLIX")
+st.markdown("<h1 style='text-align: center; color: red;'>NIPSFLIX</h1>", unsafe_allow_html=True)
 
 
-def show_code(demo):
-    """Showing the code of the demo."""
-    show_code = st.sidebar.checkbox("Show code", True)
-    if show_code:
-        # Showing the code of the demo.
-        st.markdown("## Code")
-        sourcelines, _ = inspect.getsourcelines(demo)
-        st.code(textwrap.dedent("".join(sourcelines[1:])))
+# Input for movie title
+movie_title = st.text_input("Enter the name of the movie:")
+if 'button_clicked' not in st.session_state:
+    st.session_state['button_clicked'] = False
+
+def callback():
+    st.session_state['button_clicked'] = True
+
+
+# Button to search for movie
+if (st.button("Search", on_click=callback) or st.session_state['button_clicked']):
+    if movie_title:
+        st.write("Searching for:", movie_title)
+        movies = search_movie(movie_title)
+        if movies:
+            st.write("Found", len(movies), "movies:")
+        else:
+            st.write("No movies found with that title.")
+
+        # Option to watch a movie
+        option = st.selectbox("Select a movie to watch:", [movie["title"] for movie in movies])
+        if st.button("Watch"):
+            selection_idx = [movie["title"] for movie in movies].index(option)
+            movie_id = ia.get_imdbID(movies[selection_idx])
+            webbrowser.open("https://vidsrc.to/embed/movie/tt" + movie_id)
+
