@@ -38,5 +38,6 @@ if (st.button("Search", on_click=callback) or st.session_state['button_clicked']
         if st.button("Watch"):
             selection_idx = [movie["title"] for movie in movies].index(option)
             movie_id = ia.get_imdbID(movies[selection_idx])
-            webbrowser.open("https://vidsrc.to/embed/movie/tt" + movie_id)
+            url = "https://vidsrc.to/embed/movie/tt" + str(movie_id)
+            st.markdown("[ ENJOY :) ](%s)" % url)
 
